@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import { Category } from './Category';
 
 @Entity('transactions')
 export class Transaction {
@@ -13,6 +14,9 @@ export class Transaction {
 
   @Column({ type: 'integer' })
   category_id: number;
+
+  @ManyToOne(() => Category)
+  category: Category;
 
   @Column({ type: 'decimal', precision: 15, scale: 2 })
   amount: number;

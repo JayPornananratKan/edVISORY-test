@@ -5,7 +5,8 @@ type TranslationKey =
   | 'auth.login_success' | 'auth.login_failed' | 'auth.logout_success' | 'auth.session_expired'
   | 'auth.invalid_credentials' | 'auth.user_not_found' | 'auth.account_locked' | 'auth.registration_success'
   | 'auth.email_already_exists' | 'auth.username_already_exists' | 'auth.password_updated'
-  | 'auth.device_not_found' | 'auth.session_not_found'
+  | 'auth.device_not_found' | 'auth.session_not_found' | 'auth.username_exists' | 'auth.email_exists'
+  | 'auth.logout_all_success'
   | 'general.success' | 'general.error' | 'general.not_found' | 'general.unauthorized'
   | 'general.forbidden' | 'general.server_error' | 'general.validation_error' | 'general.created'
   | 'general.updated' | 'general.deleted' | 'general.no_data' | 'general.invalid_request'
@@ -15,7 +16,7 @@ type TranslationKey =
   | 'account.type_required'
   | 'category.created' | 'category.updated' | 'category.deleted' | 'category.not_found'
   | 'category.has_transactions' | 'category.name_required' | 'category.parent_not_found'
-  | 'category.circular_reference'
+  | 'category.circular_reference' | 'category.type_mismatch' | 'category.has_children'
   | 'transaction.created' | 'transaction.updated' | 'transaction.deleted' | 'transaction.not_found'
   | 'transaction.account_not_found' | 'transaction.category_not_found' | 'transaction.amount_required'
   | 'transaction.type_required' | 'transaction.date_required' | 'transaction.invalid_amount'
@@ -61,6 +62,9 @@ export class I18nUtils {
       'auth.registration_success': 'Registration successful',
       'auth.email_already_exists': 'Email already exists',
       'auth.username_already_exists': 'Username already exists',
+      'auth.username_exists': 'Username already exists',
+      'auth.email_exists': 'Email already exists',
+      'auth.logout_all_success': 'Logged out from all devices successfully',
       'auth.password_updated': 'Password updated successfully',
       'auth.device_not_found': 'Device not found',
       'auth.session_not_found': 'Session not found',
@@ -101,6 +105,8 @@ export class I18nUtils {
       'category.name_required': 'Category name is required',
       'category.parent_not_found': 'Parent category not found',
       'category.circular_reference': 'Circular reference detected',
+      'category.type_mismatch': 'Category type mismatch with parent category',
+      'category.has_children': 'Cannot delete category with subcategories',
       
       // Transactions
       'transaction.created': 'Transaction created successfully',
@@ -200,6 +206,9 @@ export class I18nUtils {
       'auth.registration_success': 'สมัครสมาชิกสำเร็จ',
       'auth.email_already_exists': 'อีเมลนี้มีผู้ใช้แล้ว',
       'auth.username_already_exists': 'ชื่อผู้ใช้นี้มีผู้ใช้แล้ว',
+      'auth.username_exists': 'ชื่อผู้ใช้นี้มีผู้ใช้แล้ว',
+      'auth.email_exists': 'อีเมลนี้มีผู้ใช้แล้ว',
+      'auth.logout_all_success': 'ออกจากระบบจากทุกอุปกรณ์สำเร็จ',
       'auth.password_updated': 'อัปเดตรหัสผ่านสำเร็จ',
       'auth.device_not_found': 'ไม่พบอุปกรณ์',
       'auth.session_not_found': 'ไม่พบเซสชัน',
@@ -240,6 +249,8 @@ export class I18nUtils {
       'category.name_required': 'จำเป็นต้องระบุชื่อหมวดหมู่',
       'category.parent_not_found': 'ไม่พบหมวดหมู่หลัก',
       'category.circular_reference': 'พบการอ้างอิงแบบวงกลม',
+      'category.type_mismatch': 'ประเภทหมวดหมู่ไม่ตรงกับหมวดหมู่หลัก',
+      'category.has_children': 'ไม่สามารถลบหมวดหมู่ที่มีหมวดหมู่ย่อยอยู่ได้',
       
       // Transactions
       'transaction.created': 'สร้างรายการเงินสำเร็จ',
