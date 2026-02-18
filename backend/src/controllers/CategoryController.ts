@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
-import { Category } from '../entities/Category';
-import { AppDataSource } from '../config/database';
+import { CategoryService } from '../services/CategoryService';
 import { I18nUtils } from '../utils/i18n';
 import { ApiResponse, AuthenticatedRequest } from '../types';
 
@@ -22,49 +21,42 @@ interface UpdateCategoryBody {
 }
 
 export class CategoryController {
-  private categoryRepository = AppDataSource.getRepository(Category);
+  private categoryService = new CategoryService();
 
   async getCategories(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
     try {
       const page = parseInt((authedRequest.query as any).page) || 1;
       const limit = parseInt((authedRequest.query as any).limit) || 50;
-      const isExpense = (authedRequest.query as any).is_expense;
-      const skip = (page - 1) * limit;
 
-      let whereCondition: any = { user_id: authedRequest.user.id };
-      if (isExpense !== undefined) {
-        whereCondition.is_expense = isExpense === 'true';
-      }
-
-      const [categories, total] = await this.categoryRepository.findAndCount({
-        where: whereCondition,
-        skip,
-        take: limit,
-        order: { created_at: 'DESC' }
-      });
+      const result = await this.categoryService.getCategories(authedRequest.user.id, page, limit);
 
       const response: ApiResponse = {
         success: true,
-        data: categories.map(category => ({
-          id: category.id,
-          name: category.name,
-          description: category.description,
-          color: category.color,
-          icon: category.icon,
-          is_expense: category.is_expense,
-          parent_id: category.parent_id,
-          is_active: category.is_active,
-          created_at: category.created_at,
-          updated_at: category.updated_at
-        })),
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-          hasNext: page * limit < total,
-          hasPrev: page > 1
-        }
+        data: result.categories,
+        pagination: result.pagination
+      };
+
+      return reply.send(response);
+
+    } catch (error) {
+      authedRequest.log.error(error);
+      const response: ApiResponse = {
+        success: false,
+        message: I18nUtils.translate('general.server_error', authedRequest.user.language),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+      return reply.code(500).send(response);
+    }
+  }
+
+  async getCategoryById(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const categoryId = parseInt((authedRequest.params as any).id);
+      const category = await this.categoryService.getCategoryById(categoryId, authedRequest.user.id);
+
+      const response: ApiResponse = {
+        success: true,
+        data: category
       };
 
       return reply.send(response);
@@ -82,60 +74,16 @@ export class CategoryController {
 
   async createCategory(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const { name, description, color, icon, is_expense, parent_id } = authedRequest.body as CreateCategoryBody;
-
-      // Check for circular reference if parent_id is provided
-      if (parent_id) {
-        const parentCategory = await this.categoryRepository.findOne({
-          where: { id: parent_id, user_id: authedRequest.user.id }
-        });
-
-        if (!parentCategory) {
-          const response: ApiResponse = {
-            success: false,
-            message: I18nUtils.translate('category.parent_not_found', authedRequest.user.language)
-          };
-          return reply.code(404).send(response);
-        }
-
-        // Check if parent is expense and child is income or vice versa
-        if (parentCategory.is_expense !== is_expense) {
-          const response: ApiResponse = {
-            success: false,
-            message: I18nUtils.translate('category.type_mismatch', authedRequest.user.language)
-          };
-          return reply.code(400).send(response);
-        }
-      }
-
-      const category = this.categoryRepository.create({
-        user_id: authedRequest.user.id,
-        name,
-        description,
-        color,
-        icon,
-        is_expense,
-        parent_id,
-        is_active: true
+      const categoryData: CreateCategoryBody = authedRequest.body as any;
+      const category = await this.categoryService.createCategory({
+        ...categoryData,
+        userId: authedRequest.user.id
       });
-
-      await this.categoryRepository.save(category);
 
       const response: ApiResponse = {
         success: true,
         message: I18nUtils.translate('category.created', authedRequest.user.language),
-        data: {
-          id: category.id,
-          name: category.name,
-          description: category.description,
-          color: category.color,
-          icon: category.icon,
-          is_expense: category.is_expense,
-          parent_id: category.parent_id,
-          is_active: category.is_active,
-          created_at: category.created_at,
-          updated_at: category.updated_at
-        }
+        data: category
       };
 
       return reply.code(201).send(response);
@@ -151,92 +99,17 @@ export class CategoryController {
     }
   }
 
-  async getCategoryById(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
-    try {
-      const { id } = authedRequest.params as { id: string };
-
-      const category = await this.categoryRepository.findOne({
-        where: { id: parseInt(id), user_id: authedRequest.user.id }
-      });
-
-      if (!category) {
-        const response: ApiResponse = {
-          success: false,
-          message: I18nUtils.translate('category.not_found', authedRequest.user.language)
-        };
-        return reply.code(404).send(response);
-      }
-
-      const response: ApiResponse = {
-        success: true,
-        data: {
-          id: category.id,
-          name: category.name,
-          description: category.description,
-          color: category.color,
-          icon: category.icon,
-          is_expense: category.is_expense,
-          parent_id: category.parent_id,
-          is_active: category.is_active,
-          created_at: category.created_at,
-          updated_at: category.updated_at
-        }
-      };
-
-      return reply.send(response);
-
-    } catch (error) {
-      authedRequest.log.error(error);
-      const response: ApiResponse = {
-        success: false,
-        message: I18nUtils.translate('general.server_error', authedRequest.user.language),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
-      return reply.code(500).send(response);
-    }
-  }
-
   async updateCategory(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const { id } = authedRequest.params as { id: string };
-      const updates = authedRequest.body as UpdateCategoryBody;
+      const categoryId = parseInt((authedRequest.params as any).id);
+      const updateData: UpdateCategoryBody = authedRequest.body as any;
 
-      const category = await this.categoryRepository.findOne({
-        where: { id: parseInt(id), user_id: authedRequest.user.id }
-      });
-
-      if (!category) {
-        const response: ApiResponse = {
-          success: false,
-          message: I18nUtils.translate('category.not_found', authedRequest.user.language)
-        };
-        return reply.code(404).send(response);
-      }
-
-      // Update category fields
-      if (updates.name) category.name = updates.name;
-      if (updates.description) category.description = updates.description;
-      if (updates.color) category.color = updates.color;
-      if (updates.icon) category.icon = updates.icon;
-      if (updates.is_active !== undefined) category.is_active = updates.is_active;
-
-      await this.categoryRepository.save(category);
+      const category = await this.categoryService.updateCategory(categoryId, authedRequest.user.id, updateData);
 
       const response: ApiResponse = {
         success: true,
         message: I18nUtils.translate('category.updated', authedRequest.user.language),
-        data: {
-          id: category.id,
-          name: category.name,
-          description: category.description,
-          color: category.color,
-          icon: category.icon,
-          is_expense: category.is_expense,
-          parent_id: category.parent_id,
-          is_active: category.is_active,
-          created_at: category.created_at,
-          updated_at: category.updated_at
-        }
+        data: category
       };
 
       return reply.send(response);
@@ -254,40 +127,65 @@ export class CategoryController {
 
   async deleteCategory(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
     try {
-      const { id } = authedRequest.params as { id: string };
-
-      const category = await this.categoryRepository.findOne({
-        where: { id: parseInt(id), user_id: authedRequest.user.id }
-      });
-
-      if (!category) {
-        const response: ApiResponse = {
-          success: false,
-          message: I18nUtils.translate('category.not_found', authedRequest.user.language)
-        };
-        return reply.code(404).send(response);
-      }
-
-      // Check if category has children
-      const hasChildren = await this.categoryRepository.findOne({
-        where: { parent_id: category.id }
-      });
-
-      if (hasChildren) {
-        const response: ApiResponse = {
-          success: false,
-          message: I18nUtils.translate('category.has_children', authedRequest.user.language)
-        };
-        return reply.code(400).send(response);
-      }
-
-      // Soft delete
-      category.is_active = false;
-      await this.categoryRepository.save(category);
+      const categoryId = parseInt((authedRequest.params as any).id);
+      await this.categoryService.deleteCategory(categoryId, authedRequest.user.id);
 
       const response: ApiResponse = {
         success: true,
         message: I18nUtils.translate('category.deleted', authedRequest.user.language)
+      };
+
+      return reply.send(response);
+
+    } catch (error) {
+      authedRequest.log.error(error);
+      const response: ApiResponse = {
+        success: false,
+        message: I18nUtils.translate('general.server_error', authedRequest.user.language),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+      return reply.code(500).send(response);
+    }
+  }
+
+  async getCategoryTree(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const result = await this.categoryService.getCategoryTree(authedRequest.user.id);
+
+      const response: ApiResponse = {
+        success: true,
+        data: result.categories,
+        pagination: {
+          page: 1,
+          limit: result.total_count,
+          total: result.total_count,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false
+        }
+      };
+
+      return reply.send(response);
+
+    } catch (error) {
+      authedRequest.log.error(error);
+      const response: ApiResponse = {
+        success: false,
+        message: I18nUtils.translate('general.server_error', authedRequest.user.language),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+      return reply.code(500).send(response);
+    }
+  }
+
+  async getCategoriesByType(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      const is_expense = (authedRequest.params as any).type === 'expense';
+      const categories = await this.categoryService.getCategoriesByType(authedRequest.user.id, is_expense);
+
+      const response: ApiResponse = {
+        success: true,
+        data: categories
       };
 
       return reply.send(response);
