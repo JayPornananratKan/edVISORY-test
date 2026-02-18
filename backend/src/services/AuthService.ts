@@ -168,13 +168,13 @@ export class AuthService {
       id: user.id,
       username: user.username,
       email: user.email,
-      firstName: (user as any).firstName,
-      lastName: (user as any).lastName,
+      firstName: user.firstName,
+      lastName: user.lastName,
       language: user.language,
-      timezone: (user as any).timezone,
-      isActive: (user as any).isActive,
-      lastLoginAt: (user as any).lastLoginAt,
-      createdAt: (user as any).createdAt
+      timezone: user.timezone,
+      isActive: user.isActive,
+      lastLoginAt: user.lastLoginAt,
+      createdAt: user.createdAt
     };
   }
 
