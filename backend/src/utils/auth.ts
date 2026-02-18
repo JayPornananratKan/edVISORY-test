@@ -195,7 +195,7 @@ export class AuthUtils {
   }
 
   // Session management
-  static async createSession(userId: number, deviceInfo: { deviceId: number | string; [key: string]: any }): Promise<string> {
+  static async createSession(userId: number, deviceInfo: { deviceId: number | string; [key: string]: any }): Promise<{ token: string; expiresAt: Date }> {
     const sessionRepository = AppDataSource.getRepository(UserSession);
     const token = this.generateSessionToken();
     const expiresAt = this.calculateSessionExpiry();
@@ -209,7 +209,7 @@ export class AuthUtils {
     });
 
     await sessionRepository.save(session);
-    return token;
+    return { token, expiresAt };
   }
 
   static async revokeSession(token: string): Promise<void> {

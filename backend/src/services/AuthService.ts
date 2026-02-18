@@ -124,13 +124,8 @@ export class AuthService {
       await this.deviceRepository.save(device);
     }
 
-    // Create session token
-    const sessionToken = AuthUtils.generateSessionToken();
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
-
-    // Store session
-    await AuthUtils.createSession(user.id, { deviceId: deviceInfo.deviceId });
+    // Create session token and store it
+    const { token: sessionToken, expiresAt } = await AuthUtils.createSession(user.id, { deviceId: deviceInfo.deviceId });
 
     // Update last login
     user.lastLoginAt = new Date();

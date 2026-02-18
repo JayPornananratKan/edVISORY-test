@@ -4,12 +4,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
 import { initializeDatabase } from './config/database';
-
-import { authRoutes } from './routes/auth';
-import { accountRoutes } from './routes/accounts';
-import { categoryRoutes } from './routes/categories';
-import { transactionRoutes } from './routes/transactions';
-import { reportRoutes } from './routes/reports';
+import { registerRoutes } from './routes';
 import { errorHandler } from './middleware/error-handler';
 import { requestLogger, responseLogger } from './middleware/request-logger';
 import { rateLimiter } from './middleware/rate-limiter';
@@ -58,27 +53,9 @@ async function registerPlugins() {
 }
 
 // Register routes
-async function registerRoutes() {
-  // Health check
-  fastify.get('/health', async (request, reply) => {
-    return {
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      version: process.env.npm_package_version || '1.0.0'
-    };
-  });
-
-  // API routes
-  await fastify.register(authRoutes, { prefix: '/api/auth' });
-  await fastify.register(accountRoutes, { prefix: '/api' });
-  await fastify.register(categoryRoutes, { prefix: '/api' });
-  await fastify.register(transactionRoutes, { prefix: '/api' });
-  await fastify.register(reportRoutes, { prefix: '/api' });
-  
-  // TODO: Add remaining routes
-  // await fastify.register(uploadRoutes, { prefix: '/api/uploads' });
-  // await fastify.register(userRoutes, { prefix: '/api/users' });
+async function registerAppRoutes() {
+  // Register all routes through index
+  await registerRoutes(fastify);
 }
 
 // Register middleware
@@ -122,7 +99,7 @@ async function start() {
     // Register plugins, routes, and middleware
     await registerPlugins();
     await registerMiddleware();
-    await registerRoutes();
+    await registerAppRoutes();
     
     // Start listening
     const port = parseInt(process.env.PORT || '3000');
