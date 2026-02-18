@@ -2,13 +2,18 @@ import dotenv from 'dotenv';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
-import multer from 'fastify-multer';
-import { initializeDatabase } from './config/database.js';
-import { authRoutes } from './routes/auth.js';
-import { errorHandler } from './middleware/error-handler.js';
-import { requestLogger, responseLogger } from './middleware/request-logger.js';
-import { rateLimiter } from './middleware/rate-limiter.js';
-import { I18nUtils } from './utils/i18n.js';
+import multipart from '@fastify/multipart';
+import { initializeDatabase } from './config/database';
+
+import { authRoutes } from './routes/auth';
+import { accountRoutes } from './routes/accounts';
+import { categoryRoutes } from './routes/categories';
+import { transactionRoutes } from './routes/transactions';
+import { reportRoutes } from './routes/reports';
+import { errorHandler } from './middleware/error-handler';
+import { requestLogger, responseLogger } from './middleware/request-logger';
+import { rateLimiter } from './middleware/rate-limiter';
+import { I18nUtils } from './utils/i18n';
 
 // Load environment variables
 dotenv.config();
@@ -49,7 +54,7 @@ async function registerPlugins() {
   });
 
   // File upload support
-  await fastify.register(multer.contentParser);
+  await fastify.register(multipart);
 }
 
 // Register routes
@@ -66,12 +71,12 @@ async function registerRoutes() {
 
   // API routes
   await fastify.register(authRoutes, { prefix: '/api/auth' });
+  await fastify.register(accountRoutes, { prefix: '/api' });
+  await fastify.register(categoryRoutes, { prefix: '/api' });
+  await fastify.register(transactionRoutes, { prefix: '/api' });
+  await fastify.register(reportRoutes, { prefix: '/api' });
   
-  // TODO: Add other routes
-  // await fastify.register(accountRoutes, { prefix: '/api/accounts' });
-  // await fastify.register(categoryRoutes, { prefix: '/api/categories' });
-  // await fastify.register(transactionRoutes, { prefix: '/api/transactions' });
-  // await fastify.register(reportRoutes, { prefix: '/api/reports' });
+  // TODO: Add remaining routes
   // await fastify.register(uploadRoutes, { prefix: '/api/uploads' });
   // await fastify.register(userRoutes, { prefix: '/api/users' });
 }
