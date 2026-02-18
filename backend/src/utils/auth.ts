@@ -200,9 +200,22 @@ export class AuthUtils {
     const token = this.generateSessionToken();
     const expiresAt = this.calculateSessionExpiry();
 
+    // Convert deviceId to number (use 0 if not a number)
+    let deviceId = 0;
+    if (typeof deviceInfo.deviceId === 'number') {
+      deviceId = deviceInfo.deviceId;
+    } else if (typeof deviceInfo.deviceId === 'string') {
+      // Try to extract number from string or use hash
+      const hash = deviceInfo.deviceId.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      deviceId = Math.abs(hash) % 1000000; // Keep it reasonable
+    }
+
     const session = sessionRepository.create({
       user_id: userId,
-      device_id: typeof deviceInfo.deviceId === 'number' ? deviceInfo.deviceId : 0,
+      device_id: deviceId,
       session_token: token,
       expires_at: expiresAt,
       is_active: true
