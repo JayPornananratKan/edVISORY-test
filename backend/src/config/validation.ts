@@ -38,12 +38,23 @@ export const userRegistrationSchema = Joi.object({
       'string.min': 'Password must be at least 8 characters long',
       'any.required': 'Password is required'
     }),
-  full_name: Joi.string()
+  firstName: Joi.string()
     .min(1)
-    .max(100)
-    .optional()
+    .max(50)
+    .required()
     .messages({
-      'string.max': 'Full name must not exceed 100 characters'
+      'string.min': 'First name is required',
+      'string.max': 'First name must not exceed 50 characters',
+      'any.required': 'First name is required'
+    }),
+  lastName: Joi.string()
+    .min(1)
+    .max(50)
+    .required()
+    .messages({
+      'string.min': 'Last name is required',
+      'string.max': 'Last name must not exceed 50 characters',
+      'any.required': 'Last name is required'
     }),
   phone: Joi.string()
     .pattern(/^[+]?[\d\s\-\(\)]+$/)

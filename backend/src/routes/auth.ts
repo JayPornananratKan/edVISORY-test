@@ -6,7 +6,6 @@ import { AuthUtils } from '../utils/auth';
 import { ProfanityFilter } from '../utils/profanity-filter';
 import { I18nUtils } from '../utils/i18n';
 import { ApiResponse, AuthenticatedRequest } from '../types';
-import { userRegistrationSchema, userLoginSchema } from '../config/validation';
 import { authMiddleware } from '../middleware/auth';
 
 interface RegisterBody {
@@ -33,11 +32,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   const deviceRepository = AppDataSource.getRepository(Device);
 
   // Register new user
-  fastify.post<{ Body: RegisterBody }>('/register', {
-    schema: {
-      body: userRegistrationSchema
-    }
-  }, async (request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) => {
+  fastify.post<{ Body: RegisterBody }>('/register', async (request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) => {
     try {
       const { username, email, password, firstName, lastName, language = 'en' } = request.body;
 
@@ -97,11 +92,7 @@ export async function authRoutes(fastify: FastifyInstance) {
   });
 
   // Login user
-  fastify.post<{ Body: LoginBody }>('/login', {
-    schema: {
-      body: userLoginSchema
-    }
-  }, async (request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) => {
+  fastify.post<{ Body: LoginBody }>('/login', async (request: FastifyRequest<{ Body: LoginBody }>, reply: FastifyReply) => {
     try {
       const { username, password, deviceInfo } = request.body;
 

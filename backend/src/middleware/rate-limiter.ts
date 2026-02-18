@@ -4,9 +4,9 @@ import { RateLimitError } from './error-handler';
 
 // Create rate limiters for different endpoints
 const authLimiter = new RateLimiterMemory({
-  points: 5, // Number of requests
-  duration: 900, // Per 15 minutes
-  blockDuration: 900, // Block for 15 minutes
+  // points: 5, // Number of requests
+  // duration: 900, // Per 15 minutes
+  // blockDuration: 900, // Block for 15 minutes
 });
 
 const generalLimiter = new RateLimiterMemory({
