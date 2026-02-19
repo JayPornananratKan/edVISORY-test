@@ -1,0 +1,21 @@
+date,description,amount,type,account_name,category_name,notes,tags
+2024-01-15,Starbucks Coffee,150.00,expense,Cash,Food & Beverage,Morning coffee,food,coffee
+2024-01-15,7-Eleven,89.50,expense,Cash,Food & Beverage,Snacks and drinks,food,convenience
+2024-01-16,BTS Skytrain,45.00,expense,Cash,Transportation,Daily commute,transport,bts
+2024-01-16,Lunch at Restaurant,320.00,expense,Cash,Food & Beverage,Team lunch,food,restaurant
+2024-01-17,Monthly Salary,50000.00,income,KTB Bank,Salary,January salary,income,salary
+2024-01-17,Electricity Bill,850.00,expense,KTB Bank,Utilities,Monthly electricity,utilities,electricity
+2024-01-18,Internet Bill,599.00,expense,KTB Bank,Utilities,Fiber internet monthly,utilities,internet
+2024-01-18,Netflix Subscription,299.00,expense,Credit Card,Entertainment,Monthly subscription,entertainment,streaming
+2024-01-19,Grocery Shopping,1,250.00,expense,Credit Card,Food & Beverage,Weekly groceries,food,groceries
+2024-01-19,Gas Station,450.00,expense,Credit Card,Transportation,Car fuel,transport,fuel
+2024-01-20,Pharmacy,180.00,expense,Cash,Healthcare,Medicine and supplies,health,pharmacy
+2024-01-20,Haircut,250.00,expense,Cash,Personal Care,Monthly haircut,personal,grooming
+2024-01-21,Cinema Tickets,240.00,expense,Cash,Entertainment,Weekend movie,entertainment,movies
+2024-01-21,Dinner with Friends,680.00,expense,Credit Card,Food & Beverage,Friend gathering,food,restaurant
+2024-01-22,Freelance Project,3,500.00,income,KTB Bank,Freelance,Website design project,income,freelance
+2024-01-22,Phone Bill,399.00,expense,Credit Card,Utilities,Mobile phone monthly,utilities,phone
+2024-01-23,Gym Membership,1,200.00,expense,Credit Card,Health & Fitness,Monthly membership,health,fitness
+2024-01-23,Book Purchase,450.00,expense,Cash,Education,Programming books,education,books
+2024-01-24,Clothing Shopping,2,100.00,expense,Credit Card,Shopping,New clothes,shopping,clothes
+2024-01-24,Coffee Shop,95.00,expense,Cash,Food & Beverage,Afternoon coffee,food,coffee
