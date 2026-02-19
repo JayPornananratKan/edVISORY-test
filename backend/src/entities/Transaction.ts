@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
 import { Category } from './Category';
+import { Account } from './Account';
 
 @Entity('transactions')
 export class Transaction {
@@ -17,6 +18,9 @@ export class Transaction {
 
   @ManyToOne(() => Category)
   category: Category;
+
+  @ManyToOne(() => Account)
+  account: Account;
 
   @Column({ type: 'decimal', precision: 15, scale: 2 })
   amount: number;

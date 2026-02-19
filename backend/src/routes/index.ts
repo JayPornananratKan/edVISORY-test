@@ -4,6 +4,7 @@ import { accountRoutes } from './accounts';
 import { categoryRoutes } from './categories';
 import { transactionRoutes } from './transactions';
 import { reportRoutes } from './reports';
+import { exportImportRoutes } from './export-import';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check
@@ -21,6 +22,7 @@ export async function registerRoutes(fastify: FastifyInstance) {
   await fastify.register(categoryRoutes, { prefix: '/api/categories' });
   await fastify.register(transactionRoutes, { prefix: '/api/transactions' });
   await fastify.register(reportRoutes, { prefix: '/api/reports' });
+  await fastify.register(exportImportRoutes, { prefix: '/api/data' });
 }
 
-export { authRoutes, accountRoutes, categoryRoutes, transactionRoutes, reportRoutes };
+export { authRoutes, accountRoutes, categoryRoutes, transactionRoutes, reportRoutes, exportImportRoutes };

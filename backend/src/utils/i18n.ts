@@ -27,7 +27,7 @@ type TranslationKey =
   | 'budget.created' | 'budget.updated' | 'budget.deleted' | 'budget.not_found'
   | 'budget.category_not_found' | 'budget.amount_required' | 'budget.invalid_period'
   | 'file.upload_success' | 'file.upload_failed' | 'file.not_found' | 'file.too_large'
-  | 'file.invalid_type' | 'file.corrupted'
+  | 'file.invalid_type' | 'file.corrupted' | 'file.required'
   | 'pagination.page_info' | 'pagination.showing' | 'pagination.no_results' | 'pagination.previous'
   | 'pagination.next'
   | 'date.today' | 'date.yesterday' | 'date.this_month' | 'date.last_month' | 'date.this_year'
@@ -148,6 +148,7 @@ export class I18nUtils {
       'file.too_large': 'File size exceeds maximum limit',
       'file.invalid_type': 'Invalid file type',
       'file.corrupted': 'File appears to be corrupted',
+      'file.required': 'File is required',
       
       // Pagination
       'pagination.page_info': 'Page {{page}} of {{totalPages}}',
@@ -292,6 +293,7 @@ export class I18nUtils {
       'file.too_large': 'ขนาดไฟล์เกินขีดจำกัด',
       'file.invalid_type': 'ประเภทไฟล์ไม่ถูกต้อง',
       'file.corrupted': 'ไฟล์อาจเสียหาย',
+      'file.required': 'จำเป็นต้องมีไฟล์',
       
       // Pagination
       'pagination.page_info': 'หน้า {{page}} จาก {{totalPages}}',
