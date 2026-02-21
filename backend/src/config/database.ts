@@ -1,5 +1,8 @@
 import { DataSource } from 'typeorm';
 import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -10,6 +13,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE || 'expense_tracker',
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   logging: process.env.DB_LOGGING === 'true',
+  ssl: false,
   entities: [path.join(__dirname, '../entities/*.ts')],
   migrations: [path.join(__dirname, '../migrations/*.ts')],
   subscribers: [path.join(__dirname, '../subscribers/*.ts')]

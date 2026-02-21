@@ -8,13 +8,10 @@ services:
       POSTGRES_DB: expense_tracker
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres123
-      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - expense-tracker-network
     restart: unless-stopped
 
   pgadmin:
@@ -23,23 +20,16 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@expensetracker.com
       PGADMIN_DEFAULT_PASSWORD: admin123
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      
     ports:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - expense-tracker-network
     depends_on:
       - postgres
     restart: unless-stopped
 
 volumes:
   postgres_data:
-    driver: local
   pgadmin_data:
-    driver: local
 
-networks:
-  expense-tracker-network:
-    driver: bridge

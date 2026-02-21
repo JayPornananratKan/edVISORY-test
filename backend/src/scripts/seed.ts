@@ -1,9 +1,13 @@
+import dotenv from 'dotenv';
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User';
 import { Account } from '../entities/Account';
 import { Category } from '../entities/Category';
 import { Transaction } from '../entities/Transaction';
 import { AuthUtils } from '../utils/auth';
+
+// Load environment variables
+dotenv.config();
 
 async function seedDatabase() {
   try {
