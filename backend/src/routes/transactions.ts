@@ -5,11 +5,18 @@ import { authMiddleware } from '../middleware/auth';
 const transactionController = new TransactionController();
 
 export async function transactionRoutes(fastify: FastifyInstance) {
-  // Create new transaction
+  // Create new transaction (supports both JSON and multipart)
   fastify.post('/', {
     preHandler: authMiddleware
   }, async (request, reply) => {
-    return transactionController.createTransaction(request as any, reply);
+    // Check if this is a multipart request (with files)
+    const contentType = request.headers['content-type'] || '';
+    
+    if (contentType.includes('multipart/form-data')) {
+      return transactionController.createTransactionWithAttachments(request as any, reply);
+    } else {
+      return transactionController.createTransaction(request as any, reply);
+    }
   });
 
   // Get all transactions for user

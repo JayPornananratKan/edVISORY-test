@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
 import { ApiResponse, AuthenticatedRequest } from '../types';
 import { TransactionService } from '../services/TransactionService';
+import { I18nUtils } from '../utils/i18n';
 
 interface CreateTransactionBody {
   account_id: number;
@@ -16,6 +17,7 @@ interface CreateTransactionBody {
   is_recurring?: boolean;
   recurring_pattern?: string;
   reference_number?: string;
+  attachments?: string[]; // Array of attachment IDs
 }
 
 interface UpdateTransactionBody {
@@ -188,6 +190,109 @@ export class TransactionController {
       };
       
       if (error instanceof Error && error.message === 'Transaction not found') {
+        return reply.code(404).send(response);
+      }
+      
+      return reply.code(500).send(response);
+    }
+  }
+
+  async createTransactionWithAttachments(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
+    try {
+      // Parse multipart form data
+      const parts = await authedRequest.parts();
+      
+      let transactionData: any = {};
+      const files: any[] = [];
+      
+      // Separate form fields and files
+      for await (const part of parts) {
+        if (part.type === 'file') {
+          // Validate file type (images only)
+          const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+          if (!allowedTypes.includes(part.mimetype || '')) {
+            const response: ApiResponse = {
+              success: false,
+              message: I18nUtils.translate('file.invalid_type', authedRequest.user.language),
+              error: 'Only image files are allowed'
+            };
+            return reply.code(400).send(response);
+          }
+
+          // Validate file size (max 5MB)
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          if (part.file && part.file.truncated) {
+            const response: ApiResponse = {
+              success: false,
+              message: I18nUtils.translate('file.too_large', authedRequest.user.language),
+              error: 'File size exceeds 5MB limit'
+            };
+            return reply.code(400).send(response);
+          }
+
+          files.push(part);
+        } else {
+          // Parse form fields
+          if (part.fieldname === 'tags' || part.fieldname === 'attachments') {
+            transactionData[part.fieldname] = part.value && typeof part.value === 'string' ? part.value.split(',').map((item: string) => item.trim()) : [];
+          } else if (part.fieldname === 'amount' || part.fieldname === 'account_id' || part.fieldname === 'category_id') {
+            transactionData[part.fieldname] = parseInt(String(part.value));
+          } else if (part.fieldname === 'is_recurring') {
+            transactionData[part.fieldname] = part.value === 'true';
+          } else {
+            transactionData[part.fieldname] = part.value;
+          }
+        }
+      }
+
+      // Validate required fields
+      if (!transactionData.account_id || !transactionData.category_id || !transactionData.amount || !transactionData.description || !transactionData.transaction_date) {
+        const response: ApiResponse = {
+          success: false,
+          message: I18nUtils.translate('general.required_field', authedRequest.user.language),
+          error: 'Missing required fields'
+        };
+        return reply.code(400).send(response);
+      }
+
+      // Create transaction first
+      const transaction = await this.transactionService.createTransaction({
+        ...transactionData,
+        userId: authedRequest.user.id
+      });
+
+      // Upload files and link to transaction
+      const uploadedFiles = [];
+      for (const file of files) {
+        const uploadedFile = await this.transactionService.addAttachment(
+          transaction.id,
+          authedRequest.user.id,
+          file
+        );
+        uploadedFiles.push(uploadedFile);
+      }
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'Transaction created successfully with attachments',
+        data: {
+          ...transaction,
+          attachments: uploadedFiles
+        }
+      };
+
+      return reply.code(201).send(response);
+
+    } catch (error) {
+      authedRequest.log.error(error);
+      
+      const response: ApiResponse = {
+        success: false,
+        message: error instanceof Error ? error.message : 'Server error',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+      
+      if (error instanceof Error && (error.message === 'Account not found' || error.message === 'Category not found')) {
         return reply.code(404).send(response);
       }
       

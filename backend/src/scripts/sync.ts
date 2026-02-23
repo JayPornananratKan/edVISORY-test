@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User';
 import { Account } from '../entities/Account';
@@ -9,6 +10,9 @@ import { AuditLog } from '../entities/AuditLog';
 import { MonthlyBudget } from '../entities/MonthlyBudget';
 import { SystemSetting } from '../entities/SystemSetting';
 import { TransactionAttachment } from '../entities/TransactionAttachment';
+
+// Load environment variables
+dotenv.config();
 
 async function syncDatabase() {
   try {
