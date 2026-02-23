@@ -7,7 +7,7 @@ export class ProfanityFilter {
     'son of a bitch', 'bullshit', 'goddamn', 'jackass', 'dumbass', 'douchebag',
     
     // Thai profanity (common words that should be filtered)
-    'กู', 'มึง', 'ไอ้', 'อี', 'ควย', 'หี', 'แม่ง', 'สัด', 'เหี้ย', 'เฮี้ย',
+    'กู', 'มึง', 'ไอ้', 'อี', 'ควย', 'ควาย', 'หี', 'แม่ง', 'สัด', 'เหี้ย', 'เฮี้ย',
     'ชาติหมา', 'หมา', 'สันดาน', 'เย็ด', 'จู๋', 'กะหรี่', 'กระหรี่',
     'ตอด', 'รู', 'ตูด', 'ปาก', 'ปากหมา', 'แม่ง', 'สาด', 'ฟัก',
     
@@ -26,6 +26,15 @@ export class ProfanityFilter {
 
   private static readonly REPLACEMENT = '***';
 
+  private static readonly WORD_VARIANTS = new Set([
+    'fuck', 'shit', 'bitch', 'damn', 'ass', 'asshole', 'dick', 'bastard', 'crap', 'piss', 'cock'
+  ]);
+
+  // Some short Thai particles should only be filtered when they appear as standalone tokens.
+  private static readonly STANDALONE_NON_ASCII_WORDS = new Set([
+    'มึง', 'ไอ้', 'อี'
+  ]);
+
   /**
    * Filter profanity from text by replacing with asterisks
    */
@@ -35,11 +44,10 @@ export class ProfanityFilter {
     }
 
     let filteredText = text;
-    
-    // Process each profane word
+
+    // Process each profane word with safer boundaries to avoid false positives
     this.PROFANE_WORDS.forEach(word => {
-      // Create regex with word boundaries and case insensitivity
-      const regex = new RegExp(this.escapeRegex(word), 'gi');
+      const regex = this.createWordRegex(word);
       filteredText = filteredText.replace(regex, this.REPLACEMENT);
     });
 
@@ -54,11 +62,8 @@ export class ProfanityFilter {
       return false;
     }
 
-    const lowerText = text.toLowerCase();
-    
-    // Check each profane word
     for (const word of this.PROFANE_WORDS) {
-      if (lowerText.includes(word.toLowerCase())) {
+      if (this.createWordRegex(word).test(text)) {
         return true;
       }
     }
@@ -75,10 +80,9 @@ export class ProfanityFilter {
     }
 
     const foundWords: string[] = [];
-    const lowerText = text.toLowerCase();
-    
+
     for (const word of this.PROFANE_WORDS) {
-      if (lowerText.includes(word.toLowerCase())) {
+      if (this.createWordRegex(word).test(text)) {
         foundWords.push(word);
       }
     }
@@ -170,14 +174,14 @@ export class ProfanityFilter {
     let filteredText = text;
     
     this.PROFANE_WORDS.forEach(word => {
-      const regex = new RegExp(`\\b(${this.escapeRegex(word)})\\b`, 'gi');
+      const regex = this.createWordRegex(word);
       filteredText = filteredText.replace(regex, (match) => {
-        if (match.length <= 2) {
+        if (match.length <= 3) {
           return '**';
         }
         const first = match[0];
         const last = match[match.length - 1];
-        const middle = '*'.repeat(match.length - 2);
+        const middle = '*'.repeat(match.length - 3);
         return first + middle + last;
       });
     });
@@ -232,6 +236,10 @@ export class ProfanityFilter {
    * Filter profanity from object properties recursively
    */
   static filterObject(obj: any): any {
+    if (typeof obj === 'string') {
+      return this.filter(obj);
+    }
+
     if (!obj || typeof obj !== 'object') {
       return obj;
     }
@@ -253,6 +261,32 @@ export class ProfanityFilter {
     }
 
     return filtered;
+  }
+
+  /**
+   * Build a regex for a profane word with safe boundaries.
+   * English words use word boundaries; selected words support simple suffix variants.
+   */
+  private static createWordRegex(word: string): RegExp {
+    const escaped = this.escapeRegex(word);
+    const isAsciiWord = /^[a-z0-9]+$/i.test(word);
+
+    if (isAsciiWord) {
+      if (this.WORD_VARIANTS.has(word.toLowerCase())) {
+        return new RegExp(`\\b${escaped}(?:s|ed|er|ing)?\\b`, 'gi');
+      }
+
+      return new RegExp(`\\b${escaped}\\b`, 'gi');
+    }
+
+    // Selected non-ASCII words (e.g., Thai particles) should be standalone only.
+    if (this.STANDALONE_NON_ASCII_WORDS.has(word)) {
+      return new RegExp(`(?<![\\p{L}\\p{N}\\p{M}_])${escaped}(?![\\p{L}\\p{N}\\p{M}_])`, 'giu');
+    }
+
+    // Non-ASCII / symbol-based profane patterns (Thai, leetspeak, punctuation forms)
+    // default to substring matching so terms like "ควย" are found in "ไอ้ควย".
+    return new RegExp(escaped, 'gi');
   }
 
   /**

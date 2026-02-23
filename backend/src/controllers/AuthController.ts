@@ -25,6 +25,10 @@ interface LoginBody {
 export class AuthController {
   private authService = new AuthService();
 
+  private t(key: any, language: string, fallback: string): string {
+    return I18nUtils.translate(key, language) || fallback;
+  }
+
   async register(request: any, reply: FastifyReply) {
     try {
       const userData: RegisterBody = request.body;
@@ -32,7 +36,7 @@ export class AuthController {
 
       const response: ApiResponse = {
         success: true,
-        message: I18nUtils.translate('auth.registration_success', userData.language || 'en'),
+        message: this.t('auth.registration_success', userData.language || 'en', 'Registration successful'),
         data: user
       };
 
@@ -42,7 +46,7 @@ export class AuthController {
       request.log.error(error);
       const response: ApiResponse = {
         success: false,
-        message: I18nUtils.translate('general.server_error', 'en'),
+        message: this.t('general.server_error', 'en', 'Internal server error'),
         error: error instanceof Error ? error.message : 'Unknown error'
       };
       return reply.code(500).send(response);
@@ -56,7 +60,7 @@ export class AuthController {
 
       const response: ApiResponse = {
         success: true,
-        message: I18nUtils.translate('auth.login_success', 'en'),
+        message: this.t('auth.login_success', 'en', 'Login successful'),
         data: result
       };
 
@@ -64,16 +68,22 @@ export class AuthController {
 
     } catch (error) {
       request.log.error(error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const isInvalidCredentials = errorMessage.toLowerCase().includes('invalid credentials');
+
       const response: ApiResponse = {
         success: false,
-        message: I18nUtils.translate('general.server_error', 'en'),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        message: isInvalidCredentials ? 'Invalid credentials' : this.t('general.server_error', 'en', 'Internal server error'),
+        error: errorMessage
       };
-      return reply.code(500).send(response);
+      return reply.code(isInvalidCredentials ? 401 : 500).send(response);
     }
   }
 
   async logout(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
+    const language = authedRequest.user?.language || 'en';
+
     try {
       const token = authedRequest.headers.authorization?.replace('Bearer ', '') || '';
       
@@ -81,29 +91,35 @@ export class AuthController {
 
       const response: ApiResponse = {
         success: true,
-        message: I18nUtils.translate('auth.logout_success', authedRequest.user.language)
+        message: this.t('auth.logout_success', language, 'Logout successful')
       };
 
       return reply.send(response);
 
     } catch (error) {
       authedRequest.log.error(error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const isSessionError = errorMessage.toLowerCase().includes('session');
+
       const response: ApiResponse = {
         success: false,
-        message: I18nUtils.translate('general.server_error', authedRequest.user.language),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        message: isSessionError ? 'Session not found' : this.t('general.server_error', language, 'Internal server error'),
+        error: errorMessage
       };
-      return reply.code(500).send(response);
+      return reply.code(isSessionError ? 401 : 500).send(response);
     }
   }
 
   async logoutAll(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
+    const language = authedRequest.user?.language || 'en';
+
     try {
       await this.authService.logoutAll(authedRequest.user.id);
 
       const response: ApiResponse = {
         success: true,
-        message: I18nUtils.translate('auth.logout_all_success', authedRequest.user.language)
+        message: this.t('auth.logout_all_success', language, 'Logged out from all devices successfully')
       };
 
       return reply.send(response);
@@ -112,7 +128,7 @@ export class AuthController {
       authedRequest.log.error(error);
       const response: ApiResponse = {
         success: false,
-        message: I18nUtils.translate('general.server_error', authedRequest.user.language),
+        message: this.t('general.server_error', language, 'Internal server error'),
         error: error instanceof Error ? error.message : 'Unknown error'
       };
       return reply.code(500).send(response);
@@ -120,6 +136,8 @@ export class AuthController {
   }
 
   async getProfile(authedRequest: AuthenticatedRequest, reply: FastifyReply) {
+    const language = authedRequest.user?.language || 'en';
+
     try {
       const profile = await this.authService.getUserProfile(authedRequest.user.id);
 
@@ -132,12 +150,16 @@ export class AuthController {
 
     } catch (error) {
       authedRequest.log.error(error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const isNotFound = errorMessage.toLowerCase().includes('not found');
+
       const response: ApiResponse = {
         success: false,
-        message: I18nUtils.translate('general.server_error', authedRequest.user.language),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        message: isNotFound ? 'User not found' : this.t('general.server_error', language, 'Internal server error'),
+        error: errorMessage
       };
-      return reply.code(500).send(response);
+      return reply.code(isNotFound ? 404 : 500).send(response);
     }
   }
 }

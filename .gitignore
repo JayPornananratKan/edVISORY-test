@@ -3,8 +3,9 @@
 /dist
 
 
+API_DOCUMENTATION_COMPLETE.md
 
-PHASE1_COMPLETION.md
+
 
 
 /postman
@@ -12,3 +13,5 @@ PHASE1_COMPLETION.md
 coverage/
 # Simple test files (for local development only)
 backend/src/__tests__/controllers/auth.controller.simple.test.ts
+
+/uploads/attachments
