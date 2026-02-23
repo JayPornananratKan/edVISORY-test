@@ -9,7 +9,7 @@
     "dev": "ts-node-dev --respawn --transpile-only backend/src/app.ts",
     "db:sync": "ts-node backend/src/scripts/sync.ts",
     "db:seed": "ts-node backend/src/scripts/seed.ts",
-    "test": "jest",
+    "test": "jest --config backend/jest.config.js",
     "lint": "eslint backend/src/**/*.ts",
     "lint:fix": "eslint backend/src/**/*.ts --fix"
   },
