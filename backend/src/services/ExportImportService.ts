@@ -234,22 +234,124 @@ export class ExportImportService {
     data: string;
     filename: string;
     mimeType: string;
+    spreadsheetId?: string;
+    spreadsheetUrl?: string;
   }> {
-    // This would require Google Sheets API setup
-    // For now, return JSON with Google Sheets format
-    const googleSheetsData = {
-      spreadsheetName: filename,
-      sheets: [{
-        name: 'Transactions',
-        data: data
-      }]
-    };
+    try {
+      // Check if Google Sheets credentials are configured
+      const credentials = process.env.GOOGLE_SHEETS_CREDENTIALS;
+      const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+      
+      if (!credentials) {
+        // Fallback to JSON format if Google Sheets not configured
+        console.warn('Google Sheets credentials not configured, falling back to JSON format');
+        const googleSheetsData = {
+          spreadsheetName: filename,
+          sheets: [{
+            name: 'Transactions',
+            data: data
+          }],
+          note: 'Google Sheets API not configured. This is a placeholder export.'
+        };
 
-    return {
-      data: JSON.stringify(googleSheetsData, null, 2),
-      filename: `${filename}_googlesheet.json`,
-      mimeType: 'application/json'
-    };
+        return {
+          data: JSON.stringify(googleSheetsData, null, 2),
+          filename: `${filename}_googlesheet.json`,
+          mimeType: 'application/json'
+        };
+      }
+
+      // Initialize Google Sheets API
+      const { google } = require('googleapis');
+      const auth = new google.auth.GoogleAuth({
+        credentials: JSON.parse(credentials),
+        scopes: ['https://www.googleapis.com/auth/spreadsheets']
+      });
+
+      const sheets = google.sheets({ version: 'v4', auth });
+      
+      // Prepare data for Google Sheets format
+      if (data.length === 0) {
+        throw new Error('No data to export');
+      }
+
+      // Get headers from first object
+      const headers = Object.keys(data[0]);
+      
+      // Convert data to 2D array for Google Sheets
+      const rows = [
+        headers, // Header row
+        ...data.map(item => headers.map(header => item[header] || ''))
+      ];
+
+      // Create or update spreadsheet
+      let targetSpreadsheetId = spreadsheetId;
+      
+      if (!targetSpreadsheetId) {
+        // Create new spreadsheet
+        const response = await sheets.spreadsheets.create({
+          requestBody: {
+            properties: {
+              title: `${filename}_${new Date().toISOString().split('T')[0]}`
+            },
+            sheets: [{
+              properties: {
+                title: 'Transactions'
+              }
+            }]
+          }
+        });
+        
+        targetSpreadsheetId = response.data.spreadsheetId;
+      }
+
+      // Write data to spreadsheet
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: targetSpreadsheetId,
+        range: 'Transactions!A1',
+        valueInputOption: 'RAW',
+        requestBody: {
+          values: rows
+        }
+      });
+
+      // Get spreadsheet URL
+      const spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${targetSpreadsheetId}`;
+
+      return {
+        data: JSON.stringify({
+          message: 'Successfully exported to Google Sheets',
+          spreadsheetId: targetSpreadsheetId,
+          spreadsheetUrl: spreadsheetUrl,
+          rowsExported: rows.length,
+          filename: filename
+        }, null, 2),
+        filename: `${filename}_googlesheet_export.json`,
+        mimeType: 'application/json',
+        spreadsheetId: targetSpreadsheetId,
+        spreadsheetUrl: spreadsheetUrl
+      };
+
+    } catch (error) {
+      console.error('Google Sheets export error:', error);
+      
+      // Fallback to JSON format on error
+      const googleSheetsData = {
+        spreadsheetName: filename,
+        sheets: [{
+          name: 'Transactions',
+          data: data
+        }],
+        error: 'Google Sheets export failed, fallback to JSON format',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+      };
+
+      return {
+        data: JSON.stringify(googleSheetsData, null, 2),
+        filename: `${filename}_googlesheet_error.json`,
+        mimeType: 'application/json'
+      };
+    }
   }
 
   /**
