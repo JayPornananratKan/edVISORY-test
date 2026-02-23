@@ -87,11 +87,11 @@ The API will be available at `http://localhost:3000`
 
 ```env
 # Database Configuration
-DB_HOST=localhost
+DB_HOST=postgres
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=your_password
-DB_DATABASE=edvisory_expense_tracker
+DB_DATABASE=expense_tracker
 
 # Server Configuration
 PORT=3000
