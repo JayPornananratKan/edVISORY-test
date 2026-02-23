@@ -4,7 +4,7 @@
   "description": "Backend API for expense tracking system",
   "main": "backend/dist/app.js",
   "scripts": {
-    "build": "tsc -p backend/tsconfig.json",
+    "build": "tsc",
     "start": "node backend/dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only backend/src/app.ts",
     "db:sync": "ts-node backend/src/scripts/sync.ts",
