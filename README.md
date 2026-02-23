@@ -65,7 +65,7 @@ docker-compose down
 
 #### 3. Database Setup (Auto-configured)
 The database is automatically created and configured. Access:
-- **PostgreSQL**: `localhost:5433`
+- **PostgreSQL**: `localhost:5432`
 - **PgAdmin**: `http://localhost:5050` (admin@expensetracker.com / admin123)
 
 #### 4. Sync Database Schema
@@ -79,44 +79,7 @@ npm run db:seed
 
 The API will be available at `http://localhost:3000`
 
-### Option 2: Local Development
 
-#### Prerequisites
-- Node.js 18.0.0 or higher
-- PostgreSQL 12.0 or higher
-- npm or yarn package manager
-
-#### 1. Clone and Install
-```bash
-git clone <repository-url>
-cd EdVISORY-test
-npm install
-```
-
-#### 2. Environment Setup
-```bash
-cp .env.example .env
-# Edit .env with your database and server configuration
-```
-
-#### 3. Database Setup
-```bash
-# Create PostgreSQL database
-createdb edvisory_expense_tracker
-
-# Sync database schema
-npm run db:sync
-
-# (Optional) Seed with sample data
-npm run db:seed
-```
-
-#### 4. Start Development Server
-```bash
-npm run dev
-```
-
-The server will start on `http://localhost:3000`
 
 ## 🔧 Configuration
 
@@ -209,6 +172,15 @@ npm test
 # Run tests in watch mode
 npm run test:watch
 
+# Generate coverage และดูใน terminal
+npm test -- --coverage
+ 
+# Generate coverage + HTML report
+npm test -- --coverage --coverageReporters=html
+ 
+# Clear coverage และ generate ใหม่
+npm test -- --coverage --coverageReporters=text --clearCache
+
 # Run tests with coverage
 npm run test:coverage
 
@@ -233,8 +205,6 @@ npm run db:seed      # Seed database with sample data
 
 # Quality Assurance
 npm test             # Run test suite
-npm run lint         # Run ESLint
-npm run lint:fix     # Auto-fix linting issues
 ```
 
 ## 📚 Documentation
@@ -278,7 +248,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres123
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -357,48 +327,7 @@ HOST=0.0.0.0
 NODE_ENV=development
 ```
 
-### Production Docker
 
-For production deployment:
-
-```bash
-# Build production image
-docker build -t edvisory-backend:prod .
-
-# Run with production settings
-docker run -d \
-  --name edvisory-backend \
-  -p 3000:3000 \
-  --env-file .env.production \
-  --restart unless-stopped \
-  edvisory-backend:prod
-```
-
-### Production Considerations
-- Use HTTPS in production
-- Configure proper database connection pooling
-- Set up application monitoring
-- Use reverse proxy (nginx/Apache)
-- Regular security updates
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the repository
-- Check the [API Documentation](./API_DOCUMENTATION.md)
-- Review the code comments for additional context
 
 ## 🔄 Version History
 
