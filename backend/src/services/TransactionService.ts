@@ -6,6 +6,8 @@ import { AppDataSource } from '../config/database';
 import { I18nUtils } from '../utils/i18n';
 import { ProfanityFilter } from '../utils/profanity-filter';
 import { Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface CreateTransactionData {
   account_id: number;
@@ -455,9 +457,38 @@ export class TransactionService {
       throw new Error('Transaction not found');
     }
 
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = path.join(process.cwd(), 'uploads', 'attachments');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    // Generate unique filename
+    const fileExtension = path.extname(attachmentData.filename || '');
+    const uniqueFilename = `${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+    const filePath = path.join(uploadsDir, uniqueFilename);
+
+    // Save file to disk
+    if (attachmentData.file) {
+      const fileBuffer = await fs.promises.readFile(attachmentData.file);
+      await fs.promises.writeFile(filePath, fileBuffer);
+    }
+
+    // Create attachment record with proper file mapping
     const attachment = new TransactionAttachment();
     attachment.transaction_id = transactionId;
-    Object.assign(attachment, attachmentData);
+    attachment.file_name = uniqueFilename;
+    attachment.original_name = attachmentData.filename || 'unknown';
+    attachment.file_path = filePath;
+    attachment.file_size = attachmentData.file?.byteLength || 0;
+    attachment.mime_type = attachmentData.mimetype || 'application/octet-stream';
+    
+    // Generate file hash for integrity
+    if (attachmentData.file) {
+      const crypto = require('crypto');
+      const fileBuffer = await fs.promises.readFile(filePath);
+      attachment.file_hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+    }
 
     await this.attachmentRepository.save(attachment);
 
