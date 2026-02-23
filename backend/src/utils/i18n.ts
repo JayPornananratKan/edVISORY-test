@@ -152,7 +152,7 @@ export class I18nUtils {
       
       // Pagination
       'pagination.page_info': 'Page {{page}} of {{totalPages}}',
-      'pagination.showing': 'Showing {{start}} to {{end}} of {{total}} items',
+      'pagination.showing': 'Showing {start} to {end} of {total} results',
       'pagination.no_results': 'No results found',
       'pagination.previous': 'Previous',
       'pagination.next': 'Next',
@@ -360,7 +360,8 @@ export class I18nUtils {
    * Interpolate parameters into translation string
    */
   private static interpolate(text: string, params: Record<string, any>): string {
-    return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    return text.replace(/\{\{(\w+)\}\}|\{(\w+)\}/g, (match, key1, key2) => {
+      const key = key1 || key2;
       return params[key] !== undefined ? String(params[key]) : match;
     });
   }

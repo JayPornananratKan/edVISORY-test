@@ -3,7 +3,7 @@ import Joi from 'joi';
 // Common validation patterns
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const usernamePattern = /^[a-zA-Z0-9_]{3,50}$/;
+const usernamePattern = /^[a-zA-Z0-9_]+$/;
 const decimalPattern = /^\d+(\.\d{1,2})?$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -26,6 +26,7 @@ export const userRegistrationSchema = Joi.object({
     .email()
     .required()
     .messages({
+      'string.pattern.base': 'Please provide a valid email address',
       'string.email': 'Please provide a valid email address',
       'any.required': 'Email is required'
     }),
@@ -43,6 +44,7 @@ export const userRegistrationSchema = Joi.object({
     .max(50)
     .required()
     .messages({
+      'string.empty': 'First name is required',
       'string.min': 'First name is required',
       'string.max': 'First name must not exceed 50 characters',
       'any.required': 'First name is required'
@@ -88,7 +90,9 @@ export const userLoginSchema = Joi.object({
     deviceId: Joi.string().required(),
     deviceName: Joi.string().max(100).optional(),
     deviceType: Joi.string().max(50).optional()
-  }).required()
+  }).required().messages({
+    'any.required': 'Device information is required'
+  })
 });
 
 // Account validation schemas
@@ -126,14 +130,15 @@ export const createAccountSchema = Joi.object({
     .precision(2)
     .default(0)
     .messages({
-      'number.min': 'Initial balance cannot be negative',
+      'number.min': 'Initial balance must be greater than or equal to 0',
       'number.precision': 'Balance can have maximum 2 decimal places'
     }),
   currency: Joi.string()
     .length(3)
-    .default('THB')
+    .required()
     .messages({
-      'string.length': 'Currency must be a 3-character code (e.g., THB, USD)'
+      'string.length': 'Currency must be a 3-character code (e.g., THB, USD)',
+      'any.required': 'Currency is required'
     })
 });
 
@@ -165,6 +170,14 @@ export const updateAccountSchema = Joi.object({
     .messages({
       'string.length': 'Currency must be a 3-character code (e.g., THB, USD)'
     }),
+  current_balance: Joi.number()
+    .min(0)
+    .precision(2)
+    .optional()
+    .messages({
+      'number.min': 'Current balance must be greater than or equal to 0',
+      'number.precision': 'Balance can have maximum 2 decimal places'
+    }),
   is_active: Joi.boolean()
     .optional()
 });
@@ -190,7 +203,7 @@ export const createCategorySchema = Joi.object({
     .pattern(/^#[0-9A-Fa-f]{6}$/)
     .optional()
     .messages({
-      'string.pattern.base': 'Color must be a valid hex color code (e.g., #FF6B6B)'
+      'string.pattern.base': 'Color must be a valid color (hex format, e.g., #FF6B6B)'
     }),
   icon: Joi.string()
     .max(50)
@@ -208,8 +221,10 @@ export const createCategorySchema = Joi.object({
       'number.positive': 'Parent ID must be a positive number'
     }),
   is_expense: Joi.boolean()
-    .default(true)
-    .optional()
+    .required()
+    .messages({
+      'any.required': 'Category type is required'
+    })
 });
 
 export const updateCategorySchema = Joi.object({
@@ -295,14 +310,14 @@ export const createTransactionSchema = Joi.object({
     .pattern(datePattern)
     .required()
     .messages({
-      'string.pattern.base': 'Date must be in YYYY-MM-DD format',
+      'string.pattern.base': 'Transaction date must be a valid date',
       'any.required': 'Transaction date is required'
     }),
   transaction_time: Joi.string()
     .pattern(timePattern)
     .optional()
     .messages({
-      'string.pattern.base': 'Time must be in HH:MM format'
+      'string.pattern.base': 'Transaction time must be a valid time'
     }),
   location: Joi.string()
     .max(255)
@@ -338,7 +353,7 @@ export const createTransactionSchema = Joi.object({
     .messages({
       'string.max': 'Reference number must not exceed 100 characters'
     })
-});
+}).prefs({ abortEarly: false });
 
 export const updateTransactionSchema = Joi.object({
   account_id: Joi.number()
@@ -352,7 +367,10 @@ export const updateTransactionSchema = Joi.object({
   amount: Joi.number()
     .positive()
     .precision(2)
-    .optional(),
+    .optional()
+    .messages({
+      'number.positive': 'Amount must be greater than 0'
+    }),
   transaction_type: Joi.string()
     .valid('income', 'expense', 'transfer')
     .optional(),

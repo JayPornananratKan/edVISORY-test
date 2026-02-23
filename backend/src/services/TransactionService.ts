@@ -88,8 +88,12 @@ export class TransactionService {
     }
 
     // Filter profanity in description and notes
-    const filteredDescription = description ? ProfanityFilter.filter(description) : undefined;
-    const filteredNotes = notes ? ProfanityFilter.filter(notes) : undefined;
+    const filteredDescription = description
+      ? (ProfanityFilter.filter(description) || description)
+      : undefined;
+    const filteredNotes = notes
+      ? (ProfanityFilter.filter(notes) || notes)
+      : undefined;
 
     const transaction = this.transactionRepository.create({
       user_id: userId,
@@ -121,6 +125,7 @@ export class TransactionService {
 
     return {
       id: transaction.id,
+      user_id: transaction.user_id,
       account_id: transaction.account_id,
       category_id: transaction.category_id,
       amount: transaction.amount,
@@ -213,6 +218,7 @@ export class TransactionService {
 
     return {
       id: transaction.id,
+      user_id: transaction.user_id,
       account_id: transaction.account_id,
       category_id: transaction.category_id,
       amount: transaction.amount,
@@ -298,10 +304,10 @@ export class TransactionService {
     // Filter profanity in description and notes if they're being updated
     const filteredUpdateData = { ...updateData };
     if (updateData.description) {
-      filteredUpdateData.description = ProfanityFilter.filter(updateData.description);
+      filteredUpdateData.description = ProfanityFilter.filter(updateData.description) || updateData.description;
     }
     if (updateData.notes) {
-      filteredUpdateData.notes = ProfanityFilter.filter(updateData.notes);
+      filteredUpdateData.notes = ProfanityFilter.filter(updateData.notes) || updateData.notes;
     }
 
     // Update other fields
@@ -351,6 +357,7 @@ export class TransactionService {
 
     return {
       id: transaction.id,
+      user_id: transaction.user_id,
       account_id: transaction.account_id,
       category_id: transaction.category_id,
       amount: transaction.amount,
