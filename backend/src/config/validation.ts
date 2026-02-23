@@ -537,3 +537,33 @@ export const exportQuerySchema = Joi.object({
     .valid('income', 'expense', 'transfer')
     .optional()
 });
+
+// Export all schemas for middleware use
+export const ValidationSchemas = {
+  // User schemas
+  register: userRegistrationSchema,
+  login: userLoginSchema,
+  
+  // Account schemas
+  createAccount: createAccountSchema,
+  updateAccount: updateAccountSchema,
+  id: Joi.object({ id: Joi.number().integer().positive().required() }),
+  
+  // Category schemas
+  createCategory: createCategorySchema,
+  updateCategory: updateCategorySchema,
+  
+  // Transaction schemas
+  createTransaction: createTransactionSchema,
+  updateTransaction: updateTransactionSchema,
+  transactionQuery: transactionFilterSchema,
+  
+  // Report schemas
+  transactionSummaryQuery: transactionSummarySchema,
+  dailySpendingQuery: transactionSummarySchema,
+  accountSummaryQuery: transactionSummarySchema,
+  categorySpendingQuery: transactionSummarySchema,
+  
+  // Common schemas
+  pagination: paginationSchema
+};
