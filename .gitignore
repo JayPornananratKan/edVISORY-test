@@ -8,3 +8,7 @@ PHASE1_COMPLETION.md
 
 
 /postman
+
+coverage/
+# Simple test files (for local development only)
+backend/src/__tests__/controllers/auth.controller.simple.test.ts
