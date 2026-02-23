@@ -4,7 +4,7 @@
 
 EdVISORY Expense Tracker API - RESTful API สำหรับจัดการรายรับ-จ่ายส่วนตัว
 
-**Base URL:** `http://localhost:3000`
+**Base URL:** `http://localhost:3000/api`
 
 **Authentication:** Bearer Token (จาก login response)
 
@@ -54,7 +54,7 @@ POST /api/auth/register
     "lastName": "Doe",
     "language": "en",
     "isActive": true,
-    "createdAt": "2024-01-15T10:30:00.000Z"
+    "createdAt": "2026-02-24T10:30:00.000Z"
   }
 }
 ```
@@ -94,7 +94,12 @@ X-Device-ID: optional-device-uuid
 ```json
 {
   "username": "string",
-  "password": "string"
+  "password": "string",
+  "deviceInfo": {
+    "userAgent": "Postman/1.0.0",
+    "ip": "127.0.0.1",
+    "deviceId": "postman-device-001"
+  }
 }
 ```
 
@@ -105,7 +110,7 @@ X-Device-ID: optional-device-uuid
   "message": "Login successful",
   "data": {
     "session_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "expires_at": "2024-01-16T10:30:00.000Z",
+    "expires_at": "2026-02-25T10:30:00.000Z",
     "user": {
       "id": 1,
       "username": "johndoe",
@@ -114,7 +119,7 @@ X-Device-ID: optional-device-uuid
       "lastName": "Doe",
       "language": "en",
       "isActive": true,
-      "lastLoginAt": "2024-01-15T10:30:00.000Z"
+      "lastLoginAt": "2026-02-24T10:30:00.000Z"
     }
   }
 }
@@ -200,8 +205,8 @@ Authorization: Bearer {session_token}
       "current_balance": 15000.00,
       "currency": "THB",
       "is_active": true,
-      "created_at": "2024-01-15T10:30:00.000Z",
-      "updated_at": "2024-01-15T12:30:00.000Z"
+      "created_at": "2026-02-24T10:30:00.000Z",
+      "updated_at": "2026-02-24T12:30:00.000Z"
     }
   ],
   "pagination": {
@@ -228,7 +233,7 @@ Content-Type: application/json
 ```json
 {
   "name": "string",
-  "account_type": "bank_account|credit_card|cash|investment",
+  "account_type": "bank_account|cash|credit_card|digital_wallet|investment|other",
   "bank_name": "string (optional)",
   "account_number": "string (optional)",
   "initial_balance": 10000.00,
@@ -251,7 +256,7 @@ Content-Type: application/json
     "current_balance": 0.00,
     "currency": "THB",
     "is_active": true,
-    "created_at": "2024-01-15T14:30:00.000Z"
+    "created_at": "2026-02-24T14:30:00.000Z"
   }
 }
 ```
@@ -278,8 +283,8 @@ Authorization: Bearer {session_token}
     "current_balance": 15000.00,
     "currency": "THB",
     "is_active": true,
-    "created_at": "2024-01-15T10:30:00.000Z",
-    "updated_at": "2024-01-15T12:30:00.000Z"
+    "created_at": "2026-02-24T10:30:00.000Z",
+    "updated_at": "2026-02-24T12:30:00.000Z"
   }
 }
 ```
@@ -328,7 +333,7 @@ Content-Type: application/json
     "current_balance": 15000.00,
     "currency": "THB",
     "is_active": true,
-    "updated_at": "2024-01-15T16:30:00.000Z"
+    "updated_at": "2026-02-24T16:30:00.000Z"
   }
 }
 ```
@@ -390,8 +395,8 @@ Authorization: Bearer {session_token}
       "parent_id": null,
       "is_expense": true,
       "is_active": true,
-      "created_at": "2024-01-15T10:30:00.000Z",
-      "updated_at": "2024-01-15T10:30:00.000Z"
+      "created_at": "2026-02-24T10:30:00.000Z",
+      "updated_at": "2026-02-24T10:30:00.000Z"
     },
     {
       "id": 2,
@@ -402,7 +407,7 @@ Authorization: Bearer {session_token}
       "parent_id": null,
       "is_expense": false,
       "is_active": true,
-      "created_at": "2024-01-15T10:30:00.000Z"
+      "created_at": "2026-02-24T10:30:00.000Z"
     }
   ],
   "pagination": {
@@ -451,7 +456,7 @@ Content-Type: application/json
     "parent_id": null,
     "is_expense": true,
     "is_active": true,
-    "created_at": "2024-01-15T14:30:00.000Z"
+    "created_at": "2026-02-24T14:30:00.000Z"
   }
 }
 ```
@@ -479,7 +484,7 @@ Content-Type: application/json
     "parent_id": null,
     "is_expense": true,
     "is_active": true,
-    "updated_at": "2024-01-15T16:30:00.000Z"
+    "updated_at": "2026-02-24T16:30:00.000Z"
   }
 }
 ```
@@ -515,7 +520,7 @@ Authorization: Bearer {session_token}
 
 ### Get All Transactions
 ```http
-GET /api/transactions?page=1&limit=20&start_date=2024-01-01&end_date=2024-01-31&transaction_type=expense&account_id=1&category_id=1
+GET /api/transactions?page=1&limit=20&start_date=2026-02-01&end_date=2026-02-28&transaction_type=expense&account_id=1&category_id=1
 Authorization: Bearer {session_token}
 ```
 
@@ -543,7 +548,7 @@ Authorization: Bearer {session_token}
       "transaction_type": "expense",
       "description": "Lunch at restaurant",
       "notes": "Business meeting",
-      "transaction_date": "2024-01-15",
+      "transaction_date": "2026-02-15",
       "transaction_time": "12:30:00",
       "location": "Bangkok",
       "tags": ["business", "lunch"],
@@ -562,8 +567,8 @@ Authorization: Bearer {session_token}
         "color": "#FF6B6B",
         "is_expense": true
       },
-      "created_at": "2024-01-15T12:30:00.000Z",
-      "updated_at": "2024-01-15T12:30:00.000Z"
+      "created_at": "2026-02-15T12:30:00.000Z",
+      "updated_at": "2026-02-15T12:30:00.000Z"
     }
   ],
   "pagination": {
@@ -595,13 +600,13 @@ Content-Type: application/json
   "transaction_type": "expense",
   "description": "Lunch at restaurant",
   "notes": "Business meeting (optional)",
-  "transaction_date": "2024-01-15",
+  "transaction_date": "2026-02-15",
   "transaction_time": "12:30:00 (optional)",
   "location": "Bangkok (optional)",
   "tags": ["business", "lunch"] (optional),
   "is_recurring": false (optional),
   "recurring_pattern": "monthly" (optional),
-  "recurring_end_date": "2024-12-31" (optional),
+  "recurring_end_date": "2026-12-31" (optional),
   "reference_number": "INV-001" (optional)
 }
 ```
@@ -619,7 +624,7 @@ Content-Type: application/json
     "transaction_type": "expense",
     "description": "Lunch at restaurant",
     "notes": "Business meeting",
-    "transaction_date": "2024-01-15",
+    "transaction_date": "2026-02-15",
     "transaction_time": "12:30:00",
     "location": "Bangkok",
     "tags": ["business", "lunch"],
@@ -627,7 +632,7 @@ Content-Type: application/json
     "recurring_pattern": null,
     "recurring_end_date": null,
     "reference_number": null,
-    "created_at": "2024-01-15T14:30:00.000Z"
+    "created_at": "2026-02-15T14:30:00.000Z"
   }
 }
 ```
@@ -652,7 +657,7 @@ Authorization: Bearer {session_token}
     "transaction_type": "expense",
     "description": "Lunch at restaurant",
     "notes": "Business meeting",
-    "transaction_date": "2024-01-15",
+    "transaction_date": "2026-02-15",
     "transaction_time": "12:30:00",
     "location": "Bangkok",
     "tags": ["business", "lunch"],
@@ -678,11 +683,11 @@ Authorization: Bearer {session_token}
         "original_name": "restaurant_receipt.jpg",
         "file_size": 2048576,
         "mime_type": "image/jpeg",
-        "uploaded_at": "2024-01-15T14:30:00.000Z"
+        "uploaded_at": "2026-02-15T14:30:00.000Z"
       }
     ],
-    "created_at": "2024-01-15T12:30:00.000Z",
-    "updated_at": "2024-01-15T12:30:00.000Z"
+    "created_at": "2026-02-15T12:30:00.000Z",
+    "updated_at": "2026-02-15T12:30:00.000Z"
   }
 }
 ```
@@ -705,7 +710,7 @@ Content-Type: application/json
   "transaction_type": "expense (optional)",
   "description": "Updated description (optional)",
   "notes": "Updated notes (optional)",
-  "transaction_date": "2024-01-16 (optional)",
+  "transaction_date": "2026-02-16 (optional),"
   "transaction_time": "13:00:00 (optional)",
   "location": "Updated location (optional)",
   "tags": ["updated", "tags"] (optional),
@@ -728,15 +733,15 @@ Content-Type: application/json
     "transaction_type": "expense",
     "description": "Updated description",
     "notes": "Updated notes",
-    "transaction_date": "2024-01-16",
+    "transaction_date": "2026-02-16",
     "transaction_time": "13:00:00",
     "location": "Updated location",
     "tags": ["updated", "tags"],
     "is_recurring": true,
     "recurring_pattern": "weekly",
-    "recurring_end_date": "2024-06-30",
+    "recurring_end_date": "2026-06-30",
     "reference_number": null,
-    "updated_at": "2024-01-15T16:30:00.000Z"
+    "updated_at": "2026-02-15T16:30:00.000Z"
   }
 }
 ```
@@ -781,13 +786,13 @@ file: [binary file data]
   "data": {
     "id": 1,
     "transaction_id": 1,
-    "file_name": "receipt_20240115_143000.jpg",
+    "file_name": "receipt_20260215_143000.jpg",
     "original_name": "restaurant_receipt.jpg",
-    "file_path": "/uploads/transactions/receipt_20240115_143000.jpg",
+    "file_path": "/uploads/transactions/receipt_20260215_143000.jpg",
     "file_size": 2048576,
     "mime_type": "image/jpeg",
     "file_hash": "sha256:abc123...",
-    "uploaded_at": "2024-01-15T14:30:00.000Z"
+    "uploaded_at": "2026-02-15T14:30:00.000Z"
   }
 }
 ```
@@ -848,7 +853,7 @@ Authorization: Bearer {session_token}
 
 ### Export Transactions
 ```http
-GET /api/data/export?format=excel&start_date=2024-01-01&end_date=2024-01-31&account_ids=1,2&category_ids=1,3&transaction_type=expense
+GET /api/data/export?format=excel&start_date=2026-02-01&end_date=2026-02-28&account_ids=1,2&category_ids=1,3&transaction_type=expense
 Authorization: Bearer {session_token}
 ```
 
@@ -866,7 +871,7 @@ Authorization: Bearer {session_token}
 **Response (200):**
 ```
 Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-Content-Disposition: attachment; filename="transactions_2024-01-15.xlsx"
+Content-Disposition: attachment; filename="transactions_2026-02-15.xlsx"
 
 [Excel file data]
 ```
@@ -919,7 +924,7 @@ Authorization: Bearer {session_token}
 **Response (200):**
 ```
 Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-Content-Disposition: attachment; filename="import_template_2024-01-15.xlsx"
+Content-Disposition: attachment; filename="import_template_2026-02-15.xlsx"
 
 [Excel template file with sample data]
 ```
@@ -1000,23 +1005,23 @@ Authorization: Bearer {session_token}
 #### **Excel Format (.xlsx)**
 | Date | Time | Description | Notes | Amount | Type | Account Name | Category Name | Location | Tags | Is Recurring | Recurring Pattern | Reference Number |
 |------|------|-------------|-------|--------|------|--------------|---------------|----------|------|--------------|-------------------|------------------|
-| 2024-01-15 | 12:30:00 | Lunch at restaurant | Business meeting | 150.50 | expense | Savings Account | Food & Dining | Bangkok | business,lunch | FALSE | | INV-001 |
+| 2026-02-15 | 12:30:00 | Lunch at restaurant | Business meeting | 150.50 | expense | Savings Account | Food & Dining | Bangkok | business,lunch | FALSE | | INV-001 |
 
 #### **CSV Format (.csv)**
 ```csv
 Date,Time,Description,Notes,Amount,Type,Account Name,Category Name,Location,Tags,Is Recurring,Recurring Pattern,Reference Number
-2024-01-15,12:30:00,Lunch at restaurant,Business meeting,150.50,expense,Savings Account,Food & Dining,Bangkok,business,lunch,FALSE,,INV-001
-2024-01-16,09:15:00,Gas station,Monthly fuel,500.00,expense,Credit Card,Transportation,Bangkok,transport,FALSE,,
+2026-02-15,12:30:00,Lunch at restaurant,Business meeting,150.50,expense,Savings Account,Food & Dining,Bangkok,business,lunch,FALSE,,INV-001
+2026-02-16,09:15:00,Gas station,Monthly fuel,500.00,expense,Credit Card,Transportation,Bangkok,transport,FALSE,,
 ```
 
 #### **JSON Format (.json)**
 ```json
 {
-  "export_date": "2024-01-15T10:30:00.000Z",
+  "export_date": "2026-02-15T10:30:00.000Z",
   "total_transactions": 2,
   "transactions": [
     {
-      "date": "2024-01-15",
+      "date": "2026-02-15",
       "time": "12:30:00",
       "description": "Lunch at restaurant",
       "notes": "Business meeting",
@@ -1064,7 +1069,7 @@ The system automatically detects various column names:
 
 ### Get Transaction Summary
 ```http
-GET /api/reports/summary?start_date=2024-01-01&end_date=2024-01-31&group_by=category
+GET /api/reports/summary?start_date=2026-02-01&end_date=2026-02-28&group_by=category
 Authorization: Bearer {session_token}
 ```
 
@@ -1081,8 +1086,8 @@ Authorization: Bearer {session_token}
   "success": true,
   "data": {
     "period": {
-      "start_date": "2024-01-01",
-      "end_date": "2024-01-31"
+      "start_date": "2026-02-01",
+      "end_date": "2026-02-28"
     },
     "summary": {
       "total_income": 50000.00,
@@ -1150,7 +1155,7 @@ GET /api/health
   "success": true,
   "data": {
     "status": "healthy",
-    "timestamp": "2024-01-15T16:30:00.000Z",
+    "timestamp": "2026-02-24T16:30:00.000Z",
     "version": "1.0.0",
     "uptime": 3600,
     "database": {
@@ -1243,7 +1248,7 @@ All API responses support multiple languages based on user preference:
 ### Environment Variables
 ```json
 {
-  "baseUrl": "http://localhost:3000",
+  "baseUrl": "http://localhost:3000/api",
   "authToken": "{{login_response.data.session_token}}"
 }
 ```
